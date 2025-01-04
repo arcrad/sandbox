@@ -1,0 +1,42 @@
+<!DOCTYPE hmtl>
+<html>
+  <head>
+    <script src="./async_request_queue.js" type="module"></script>
+    <script src="./arq_demo.js" type="module"></script>
+  </head>
+  <style>
+    .waiter {
+      border: 1px solid #000;
+      margin: 0.5rem auto;
+      padding: 0.5rem;
+      background: #eee;
+      max-width: 80%;
+    }
+
+    @keyframes wiggle {
+      0% {
+        transform: translateX(-10px);
+      }
+
+      50% {
+        transform: translateX(10px);
+      }
+
+      100% {
+        transform: translateX(-10px);
+      }
+    }
+
+    .waiter.running {
+      animation-name: wiggle;
+      animation-duration: 1.1s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    } 
+  </style>
+  <body>
+    <div id="mainContainer" class="mainContainer">
+      hell!!o
+    </div>
+  </body>
+</html>

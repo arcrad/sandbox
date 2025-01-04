@@ -25,7 +25,7 @@ export default class AsyncRequestQueue {
 
   async #process() {
     const curId = this.#id++;
-    /////console.log('------- process() called. curId='+curId+' ------- ');
+    console.log('------- process() called. curId='+curId+' ------- ');
     /////console.log('queue length = '+this.#queue.length);
     if(this.#queue.length === 0 ) {
       /////console.log('resolve curId='+curId);
