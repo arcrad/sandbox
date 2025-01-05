@@ -1,0 +1,147 @@
+:root {
+  font-family: arial, sans;
+}
+
+@keyframes progress-bar {
+  0% {
+    width: 100%;
+  }
+
+  100% {
+    width: 0%;
+  }
+}
+
+@keyframes wiggle {
+  0% {
+    /*transform: translateX(-5px);*/
+    transform: scale(100%);;
+  }
+
+  50% {
+    /*transform: translateX(5px);*/
+    transform: scale(103%);
+  }
+
+  100% {
+    /*transform: translateX(-5px);*/
+    transform: scale(100%);;
+  }
+}
+
+.controlsContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 500;
+  background: #aaa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+.controlsContainer button {
+  margin: 0.5rem;
+}
+
+.waiter.running {
+  animation-name: wiggle;
+  animation-duration: 0.8s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+} 
+
+.waiter {
+  border: 1px solid #000;
+  margin: 0.5rem auto;
+  padding: 0;
+  background: #eee;
+  width: min-content;
+  position: relative;
+}
+
+.textContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+.waiter.resolved .textContainer{
+  background: green;
+  background: #77f56f;
+}
+.waiter.rejected .textContainer{
+  background: red;
+  background: #ff9a9a; 
+}
+
+.idBox {
+  min-width: 7ex;
+  text-align: center;
+  font-size: 1.35rem;
+}
+.idBox:before {
+  content: '#';
+  font-weight: bold;
+}
+
+.timeoutBox {
+  background: rgb(255,255,255,50%);
+  text-align: center;
+  padding: 0.25rem;
+  margin: 0.25rem;
+  margin-right: 0;
+}
+.timeoutBox:before {
+  content: 'TIMEOUT';
+  display: block;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-bottom: 0.1rem;
+}
+
+.runtimeBox {
+  background: rgb(255,255,255,50%);
+  text-align: center;
+  padding: 0.25rem;
+  margin: 0.25rem;
+}
+.runtimeBox:before {
+  content: 'RUNTIME';
+  display: block;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-bottom: 0.1rem;
+}
+
+.progressBar {
+  background: green;
+  width: 100%;
+  height: 0.25rem;
+  animation-name: progress-bar;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+  animation-play-state: paused;
+}
+
+.waiter.running .progressBar{
+  animation-play-state: running;
+} 
+
+.waiter.done .progressBar {
+  width: 0%;
+  visibility: hidden;
+} 
+
+.notice {
+  margin: 0.5rem auto;
+  padding: 0.5rem 1rem;
+  background: #720087;
+  color: #fff;
+  font-weight: bold;
+  position: relative;
+  width: fit-content;
+  text-align: center;
+}
