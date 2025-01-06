@@ -5,25 +5,66 @@ class ArqDemo {
   #mainContainerElement = null;
   #renderedWaiters = [];
   #currentWaiterId = 0;
+  #prevNumFulfilled = 0;
+  #prevNumRejected = 0;
+
   constructor(mainContainerElement) {
     this.#mainContainerElement = mainContainerElement;
-    console.dir(this.#mainContainerElement.innerText);
-    let initialWaiters = [];
+    this.#buildInitialInterface();
+    // Add initial waiters.
+    let initialWaiters = [this.#createWaiter(10000)];
     for(let c = 0; c < 4; c++) {
       initialWaiters.push(this.#createWaiter());
     }
-    initialWaiters.push(this.#createWaiter(10000));
     this.#internalArq = new AsyncRequestQueue(initialWaiters);
   }
+
+  #buildInitialInterface() {
+    this.waiterContainer = document.createElement('div');
+    this.waiterContainer.classList.add('waiterContainer');
+    this.controlsContainer = document.createElement('div');
+    this.controlsContainer.classList.add('controlsContainer');
+    this.startButton = document.createElement('button');
+    this.startButton.innerText = 'Start';
+    this.startButton.addEventListener('click', () => {
+      this.#start()
+    }); 
+    this.addButton = document.createElement('button');
+    this.addButton.innerText = 'Add Waiter';
+    this.addButton.addEventListener('click', () => {
+      this.#internalArq.enqueue(this.#createWaiter());
+    }); 
+    this.concurrencyDropdown  = document.createElement('select');
+    for(let c = 1; c < 11; c++) {
+      const newOption = document.createElement('option');
+      newOption.value = c;
+      newOption.innerText = c;
+      if(c === 3) {
+        newOption.selected = true;
+      }
+      this.concurrencyDropdown.appendChild(newOption);
+    }
+    this.concurrencyDropdown.addEventListener(
+      'change',
+      (event) => { 
+        this.#changeConcurrency(event.target.value);
+      }
+    );
+    this.controlsContainer.appendChild(this.startButton);
+    this.controlsContainer.appendChild(this.addButton);
+    this.controlsContainer.appendChild(this.concurrencyDropdown);
+    this.#mainContainerElement.appendChild(this.waiterContainer);
+    this.#mainContainerElement.appendChild(this.controlsContainer);
+  }
+
   #getId() {
     return this.#currentWaiterId++;
   }
+
   #createWaiter(timeoutMs = null) {
-    console.log('addWaiter() called');
     if(!timeoutMs) {
       timeoutMs = 250+(Math.random()*10000);
     }
-    //const rgbColorCodeValues = `${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)}`;
     const rgbColorCodeValues = 
       `${Math.floor((Math.random()*127)+128)},`+
       `${Math.floor((Math.random()*127)+128)},`+
@@ -32,11 +73,9 @@ class ArqDemo {
     const id = this.#getId();
     const waiter = {};
     waiter.waiterElement = document.createElement('div');
-    //waiter.waiterElement.innerText = `Waiting to run for ${Math.round((timeoutMs/1000)*100)/100} seconds...`;
     waiter.waiterElement.classList.add('waiter');
     waiter.textContainer = document.createElement('div');
     waiter.textContainer.classList.add('textContainer');
-    //waiter.textContainer.style = `background: rgb(${rgbColorCodeValues}, 37%)`;
     waiter.textContainer.style = `background: rgb(${rgbColorCodeValues})`;
     waiter.idBox = document.createElement('div');
     waiter.idBox.classList.add('idBox');
@@ -54,25 +93,21 @@ class ArqDemo {
     waiter.idBox.innerText = id;
     waiter.timeoutBox.innerText = timeoutSeconds;
     waiter.runtimeBox.innerText = "--";
-    this.#mainContainerElement.prepend(waiter.waiterElement);
+    this.waiterContainer.prepend(waiter.waiterElement);
     this.#renderedWaiters.push(waiter);
     return () => {
       const startTime = Date.now();
-      //waiter.waiterElement.style = `background: rgb(${rgbColorCodeValues});`;
-      //waiter.waiterElement.innerText = `Now RUNNING for ${Math.round((timeoutMs/1000)*100)/100} seconds...`;
-      waiter.waiterElement.classList.toggle('running');
+      waiter.waiterElement.classList.add('running');
       waiter.textContainer.style = `background: rgb(${rgbColorCodeValues});`;
       waiter.progressBar.style = `animation-duration: ${timeoutSeconds}s`;
-      /////this.#renderedWaiters.push(waiter);
       return new Promise( (resolve, reject) => {
         setTimeout(() => {
           const runtimeSeconds = parseInt(((Date.now() - startTime)/1000)*100)/100;
           const finishedMessage = `FINISHED running after ${runtimeSeconds} seconds`;
-          //waiter.textContainer.style = `background: rgb(${rgbColorCodeValues}, 37%)`;
           waiter.textContainer.style = null;
           waiter.runtimeBox.innerText = runtimeSeconds;
           waiter.waiterElement.classList.add('done');
-          waiter.waiterElement.classList.toggle('running');
+          waiter.waiterElement.classList.remove('running');
           if(Math.random() > 0.5) {
             waiter.waiterElement.classList.add('resolved');
             resolve(finishedMessage);
@@ -84,71 +119,58 @@ class ArqDemo {
       });
     }
   }
-  #addCompleteNotice(data) {
-    for(let item of data) {
-      console.dir(item);
-    }
+
+  #addStartNotice(data) {
     const notice = {};
     notice.noticeElement = document.createElement('div');
     notice.noticeElement.classList.add('notice');
-    notice.noticeElement.innerText = 'All items settled!';
-    this.#mainContainerElement.prepend(notice.noticeElement);
+    notice.noticeElement.innerHTML = `Start processing...`;
+    this.waiterContainer.prepend(notice.noticeElement);
     return notice;
   }
-  #render() {
+
+  #addCompleteNotice(data) {
+    let numFulfilled = 0;
+    let numRejected = 0;
+    for(let item of data) {
+      if(item.status === 'fulfilled') {
+        numFulfilled++;
+      } else {
+        numRejected++;
+      }
+    }
+    const deltaFulfilled = numFulfilled - this.#prevNumFulfilled;
+    const deltaRejected = numRejected - this.#prevNumRejected;
+    this.#prevNumFulfilled = numFulfilled;
+    this.#prevNumRejected = numRejected;
+    const notice = {};
+    notice.noticeElement = document.createElement('div');
+    notice.noticeElement.classList.add('notice');
+    notice.noticeElement.innerHTML = 
+      `All waiters settled!<br>` +
+      `${deltaFulfilled} waiters fulfilled (${numFulfilled} total).<br>` +
+      `${deltaRejected} waiters rejected (${numRejected} total).`;
+    this.waiterContainer.prepend(notice.noticeElement);
+    return notice;
   }
-  #startDemo() {
+
+  #start() {
+    this.#addStartNotice();
     this.#internalArq.startProcessing().then(
       (result) => { 
-        console.log('done processing');
-        console.dir(result);
-        this.#addCompleteNotice(result);
+        setTimeout( () => {
+          this.#addCompleteNotice(result);
+        }, 250);
       }
     );
   }
+
   #changeConcurrency(newValue) {
-    console.log('change concurrency');
     this.#internalArq.setMaxSimultaneousItems(newValue);
-  }
-  #buildInitialInterface() {
-    this.controlsContainer = document.createElement('div');
-    this.controlsContainer.classList.add('controlsContainer');
-    this.startButton = document.createElement('button');
-    this.startButton.innerText = 'Start';
-    this.startButton.addEventListener('click', () => {
-      this.#startDemo()
-    }); 
-    this.addButton = document.createElement('button');
-    this.addButton.innerText = 'Add Waiter';
-    this.addButton.addEventListener('click', () => {
-      this.#internalArq.enqueue(this.#createWaiter());
-    }); 
-    this.concurrencyDropdown  = document.createElement('select');
-    for(let c = 1; c < 11; c++) {
-      const newOption = document.createElement('option');
-      newOption.value = c;
-      newOption.innerText = c;
-      this.concurrencyDropdown.appendChild(newOption);
-    }
-    this.concurrencyDropdown.addEventListener(
-      'change',
-      (event) => { 
-        this.#changeConcurrency(event.target.value);
-      }
-    );
-    this.controlsContainer.appendChild(this.startButton);
-    this.controlsContainer.appendChild(this.addButton);
-    this.controlsContainer.appendChild(this.concurrencyDropdown);
-    this.#mainContainerElement.appendChild(this.controlsContainer);
-  }
-  initialize() {
-    this.#buildInitialInterface();
   }
 };
 
-
 document.addEventListener('DOMContentLoaded', () => {
   const demo1 = new ArqDemo(document.getElementById('mainContainer'));
-  demo1.initialize();
 });
 
