@@ -1,6 +1,7 @@
 {
   "name": "sandbox",
   "version": "1.0.0",
+  "type": "module",
   "description": "A collection of small projects, demos, and explorations.",
   "main": "index.js",
   "scripts": {
