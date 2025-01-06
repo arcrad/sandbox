@@ -6,7 +6,6 @@ export default class AsyncRequestQueue {
   #processCompleteHandler = null;
   #processPromise = null;
   #isProcessing = false;
-  #id = 0;
 
   constructor(initialItems) {
     this.#queue = [...initialItems];
@@ -29,11 +28,7 @@ export default class AsyncRequestQueue {
   }
 
   #process() {
-    //const curId = this.#id++;
-    //console.log('------- process() called. curId='+curId+' ------- ');
-    /////console.log('queue length = '+this.#queue.length);
     if(this.#queue.length > 0 && this.#currentItemsRunning < this.#maxSimultaneousItems) {
-      /////console.log('run another item. curId='+curId);
       this.#runItem(
         this.#queue.shift()
       ).then( 
@@ -55,17 +50,14 @@ export default class AsyncRequestQueue {
       }).finally(
         () => {
           if(this.#queue.length === 0 && this.#currentItemsRunning == 0) {
-            //allItemsDoneRunning();
             this.#processCompleteHandler();
             return;
           }
         }
       );
       this.#currentItemsRunning++;
-      /////console.dir(`currentItemsRunning=${this.#currentItemsRunning}`);
       this.#process(); 
     }
-    /////console.log('------- end process() call with curId='+curId+' -------');
   }
 
   startProcessing() {
@@ -81,8 +73,6 @@ export default class AsyncRequestQueue {
     this.#isProcessing = true;
     this.#processPromise = new Promise( (resolve, reject) => {
       this.#processCompleteHandler = () => {
-        console.log('the queue has been emptied');
-        console.dir(this.#executionQueue);
         this.#isProcessing = false;
         resolve(this.#executionQueue);
       };
