@@ -1,7 +1,3 @@
-:root {
-  font-family: arial, sans;
-}
-
 @keyframes progress-bar {
   0% {
     width: 100%;
@@ -12,54 +8,74 @@
   }
 }
 
+@keyframes slide-down {
+  0% {
+    margin: -5rem auto 0.5rem auto;
+  }
+  100% {
+  margin: 0.5rem auto;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(30%);
+    filter: blur(5px);
+  }
+  100% {
+    transform: scale(100%);
+    filter: blur(0px);
+  }
+}
+
 @keyframes wiggle {
   0% {
-    /*transform: translateX(-5px);*/
-    transform: scale(100%);;
+    transform: scale(100%);
   }
 
   50% {
-    /*transform: translateX(5px);*/
-    transform: scale(103%);
+    transform: scale(113%, 103%);
   }
 
   100% {
-    /*transform: translateX(-5px);*/
     transform: scale(100%);;
   }
 }
 
-.controlsContainer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 500;
-  background: #aaa;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
+:root {
+  font-family: arial, sans;
+  background: #020202;
 }
 
-.controlsContainer button {
-  margin: 0.5rem;
+.mainContainer {
+  padding-top: 0.5rem;
 }
 
-.waiter.running {
-  animation-name: wiggle;
-  animation-duration: 0.8s;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-} 
+.waiterContainer {
+  margin-top: -1rem;
+  padding-bottom: 10dvh;
+}
 
 .waiter {
   border: 1px solid #000;
-  margin: 0.5rem auto;
+  margin: 0.5rem auto 0 auto;
   padding: 0;
   background: #eee;
   width: min-content;
   position: relative;
+  animation-name: slide-down, wiggle;
+  animation-duration: 0.5s, 0.8s;
+  animation-timing-function: ease-out, ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-play-state: running, paused;
+  animation-composition: add;
+}
+.waiter.running {
+  animation-play-state: running, running;
+} 
+.waiter.done {
+  opacity: 55%;
+  animation-name: unset;
 }
 
 .textContainer {
@@ -118,22 +134,40 @@
 
 .progressBar {
   background: green;
+  border-bottom: 1px solid #99ff99;
   width: 100%;
-  height: 0.25rem;
+  height: 0.3rem;
   animation-name: progress-bar;
   animation-timing-function: linear;
   animation-iteration-count: 1;
   animation-play-state: paused;
 }
-
 .waiter.running .progressBar{
   animation-play-state: running;
 } 
-
 .waiter.done .progressBar {
   width: 0%;
   visibility: hidden;
 } 
+
+.controlsContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 500;
+  background: #aaa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+.controlsContainer button,
+.controlsContainer select {
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1.2rem;
+}
 
 .notice {
   margin: 0.5rem auto;
@@ -144,4 +178,10 @@
   position: relative;
   width: fit-content;
   text-align: center;
+  animation-name: pop-in;
+  animation-duration: 0.15s;
+  animation-timing-function: ease-in;
+  animation-iteration-count: 1;
+  animation-play-state: running;
+  animation-fill-mode: forwards;
 }
