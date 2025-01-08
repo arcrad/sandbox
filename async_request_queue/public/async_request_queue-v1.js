@@ -3,9 +3,6 @@ export default class AsyncRequestQueue {
   #executionQueue = [];
   #maxSimultaneousItems = 3;
   #currentItemsRunning = 0;
-  #processCompleteHandler = null;
-  #processPromise = null;
-  #isProcessing = false;
 
   constructor(initialItems) {
     this.#queue = [...initialItems];
@@ -27,11 +24,13 @@ export default class AsyncRequestQueue {
     });
   }
 
-  async process() {
-    return new Promise( async (resolve, reject) => {
+  process() {
+    return new Promise( (resolve, reject) => {
       resolve( new Promise( async (resolve, reject) => {
-        console.log(this.#currentItemsRunning);
-        if(this.#queue.length > 0 && this.#currentItemsRunning < this.#maxSimultaneousItems) {
+        if(
+          this.#queue.length > 0 
+          && this.#currentItemsRunning < this.#maxSimultaneousItems
+        ) {
           let nextItem = this.#queue.shift();
           if(nextItem) { 
             this.#currentItemsRunning++;
@@ -42,26 +41,19 @@ export default class AsyncRequestQueue {
         if(this.#queue.length === 0 ) {
           resolve(this.#executionQueue);
         }
-      })
-    );
-  });
+      }));
+    });
   }
 
-  async startProcessing() {
+  startProcessing() {
     return this.process();
   }
 
   enqueue(newItem) {
     this.#queue.push(newItem);
-    if(this.#isProcessing) {
-      this.process();
-    }
   }
 
   setMaxSimultaneousItems(newMax = 3) {
     this.#maxSimultaneousItems = newMax;
-    if(this.#isProcessing) {
-      this.process();
-    }
   }
 }

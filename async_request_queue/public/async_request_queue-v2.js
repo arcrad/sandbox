@@ -24,7 +24,7 @@ export default class AsyncRequestQueue {
     });
   }
 
-  async #process() {
+  #process() {
     if(this.#queue.length === 0 ) {
       return;
     }
