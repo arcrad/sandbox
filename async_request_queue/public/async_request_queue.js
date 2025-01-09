@@ -3,12 +3,14 @@ export default class AsyncRequestQueue {
   #executionQueue = [];
   #maxSimultaneousItems = 3;
   #currentItemsRunning = 0;
-  #processCompleteHandler = null;
+  #processCompleteHandler = () => {};
   #processPromise = null;
   #isProcessing = false;
 
   constructor(initialItems) {
-    this.#queue = [...initialItems];
+    if(initialItems && typeof initialItems[Symbol.iterator] === 'function') {
+      this.#queue = [...initialItems];
+    }
   }
   
   #runItem(item) {
@@ -63,12 +65,13 @@ export default class AsyncRequestQueue {
   startProcessing() {
     if(this.#isProcessing === true) {
       //Allow calling multiple times while processing? 
-      //return Promise.reject('Already processing');// this.#processPromise;
       return this.#processPromise;
+      // Or reject?
+      //return Promise.reject('Already processing');
     }
     if(this.#isProcessing === false && this.#queue.length === 0) {
       this.#processCompleteHandler();
-      return this.#processPromise;
+      return this.#processPromise ?? Promise.resolve([]);
     }
     this.#isProcessing = true;
     this.#processPromise = new Promise( (resolve, reject) => {
