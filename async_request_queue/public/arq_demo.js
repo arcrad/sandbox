@@ -129,7 +129,13 @@ class ArqDemo {
     return notice;
   }
 
-  #addCompleteNotice(data) {
+  #addCompleteNoticePlaceholder() {
+    const noticePlaceholderElement = document.createElement('div');
+    this.waiterContainer.prepend(noticePlaceholderElement);
+    return noticePlaceholderElement;
+  }
+
+  #createCompleteNotice(data) {
     let numFulfilled = 0;
     let numRejected = 0;
     for(let item of data) {
@@ -150,7 +156,6 @@ class ArqDemo {
       `All waiters settled!<br>` +
       `${deltaFulfilled} waiters fulfilled (${numFulfilled} total).<br>` +
       `${deltaRejected} waiters rejected (${numRejected} total).`;
-    this.waiterContainer.prepend(notice.noticeElement);
     return notice;
   }
 
@@ -158,8 +163,9 @@ class ArqDemo {
     this.#addStartNotice();
     this.#internalArq.startProcessing().then(
       (result) => { 
+        const noticePlaceholder = this.#addCompleteNoticePlaceholder();
         setTimeout( () => {
-          this.#addCompleteNotice(result);
+          noticePlaceholder.replaceWith(this.#createCompleteNotice(result).noticeElement);
         }, 250);
       }
     );
